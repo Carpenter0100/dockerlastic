@@ -1,0 +1,23 @@
+#!/usr/bin/env php
+<?php
+
+declare(strict_types=1);
+
+use Simovative\Dockerlastic\Search\Console\ExportCommand;
+use Simovative\Dockerlastic\Search\Console\SearchCommand;
+use Symfony\Component\Console\Application;
+
+chdir(__DIR__);
+
+require 'vendor/autoload.php';
+
+// keep global namespace clean.
+(static function (): void {
+
+    $console = new Application();
+
+    $console->add(new ExportCommand());
+    $console->add(new SearchCommand());
+
+    $console->run();
+})();

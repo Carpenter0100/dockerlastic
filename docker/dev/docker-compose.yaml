@@ -1,0 +1,61 @@
+version: '3.8'
+
+services:
+  nginx:
+    container_name: ${COMPOSE_PROJECT_NAME}_dev_nginx
+    build:
+      context: ./../..
+      target: nginx-dev
+      dockerfile: ./docker/dev/Dockerfile
+    ports:
+      - "80:80"
+    environment:
+      APP_DOMAIN: "${APP_DOMAIN}"
+    working_dir: /etc/nginx
+    restart: always
+    networks:
+      - backend_net
+    volumes:
+      - ./../..:/app/dockerlastic
+
+  php:
+    container_name: ${COMPOSE_PROJECT_NAME}_dev_php
+    build:
+      context: ./../..
+      target: php-dev
+      dockerfile: ./docker/dev/Dockerfile
+    volumes:
+      - ./../..:/app/dockerlastic
+    environment:
+      APP_ENVIRONMENT: "${APP_ENVIRONMENT}"
+      XDEBUG_CONFIG: "client_host=host.docker.internal"
+    working_dir: /app/dockerlastic
+    restart: always
+    networks:
+      - backend_net
+
+  elasticsearch:
+    container_name: ${COMPOSE_PROJECT_NAME}_elasticsearch_php
+    image: elasticsearch:8.8.0
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms1g -Xmx1g
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - volume-elasticsearch:/usr/share/elasticsearch/data
+    networks:
+      - backend_net
+
+volumes:
+  volume-elasticsearch:
+
+networks:
+  backend_net:
+    driver: bridge

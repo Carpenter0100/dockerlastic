@@ -1,0 +1,10 @@
+# Ide
+.idea/
+.DS_Store
+.vscode/
+
+# Build
+/docker/dev/.env
+
+# Backend
+/vendor

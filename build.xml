@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="Dockerlastic" default="build:dev" basedir=".">
+    <property name="phpContainer" value="dockerlastic_dev_php"/>
+    <property name="composeFiles" value="-f docker-compose.yaml"/>
+
+    <target name="build:dev" description="kill dev => build dev">
+        <phingcall target="docker:up-build"/>
+        <phingcall target="composer:install" />
+        <phingcall target="docker:ps"/>
+        <echo msg="Dev build completed. System should be healthy now!"/>
+    </target>
+
+    <target name="docker:kill-all">
+        <phingcall target="docker:down"/>
+        <exec passthru="true" command="docker system prune -f"/>
+        <exec passthru="true" command="docker rmi $(docker images -a -q)"/>
+        <exec passthru="true" command="docker volume prune -f"/>
+    </target>
+
+    <target name="docker:down">
+        <exec passthru="true" command="cd docker/dev &amp;&amp; docker compose ${composeFiles} down"/>
+        <phingcall target="docker:ps"/>
+    </target>
+
+    <target name="docker:up">
+        <exec passthru="true" command="cd docker/dev &amp;&amp; docker compose ${composeFiles} up -d"/>
+        <phingcall target="docker:ps"/>
+    </target>
+
+    <target name="docker:up-build" hidden="true">
+        <exec passthru="true" checkreturn="true" command="cd docker/dev &amp;&amp; COMPOSE_DOCKER_CLI_BUILD=1 DOCKER_BUILDKIT=1 docker compose ${composeFiles} build --no-cache"/>
+        <phingcall target="docker:up"/>
+    </target>
+
+    <target name="docker:stop">
+        <exec passthru="true" command="cd docker/dev &amp;&amp; docker compose ${composeFiles} stop"/>
+        <phingcall target="docker:ps"/>
+    </target>
+
+    <target name="docker:ps">
+        <exec passthru="true" command="docker ps"/>
+    </target>
+
+    <target name="docker:push" hidden="true">
+        <exec checkreturn="true" passthru="true" command="docker login -u ${docker.login.user} -p ${docker.login.token}"/>
+        <exec passthru="true" command="docker push ${docker.login.user}/dockerlastic-php:latest"/>
+    </target>
+
+    <target name="composer:install">
+        <exec passthru="true" command="docker exec ${phpContainer} sh -c '$(which php) bin/composer.phar install --optimize-autoloader'"/>
+    </target>
+
+    <target name="composer:update">
+        <exec passthru="true" command="docker exec ${phpContainer} sh -c '$(which php) bin/composer.phar update'"/>
+    </target>
+
+    <target name="composer:dump-autoload" hidden="true">
+        <exec passthru="true" command="docker exec ${phpContainer} sh -c '$(which php) bin/composer.phar dump-autoload --optimize'"/>
+    </target>
+
+    <target name="test:phpstan">
+        <exec passthru="true" command="docker exec ${phpContainer} sh -c '$(which php) bin/composer.phar analyze'"/>
+    </target>
+</project>
