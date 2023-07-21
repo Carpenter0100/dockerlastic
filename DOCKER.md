@@ -39,7 +39,7 @@ docker volume ls
 
 # login
 ```
-docker login -u carpenter0100 -p dckr_pat_DNncrdMf9DsYxeE0d2bu5wS1jcI
+docker login -u user -p tokenentferntundnichtmehrgueltig
 ```
 
 # logout
@@ -49,12 +49,12 @@ docker logout
 
 # push
 ```
-docker push carpenter0100/dockerlastic-php:latest
+docker push user/dockerlastic-php:latest
 ```
 
 # pull
 ```
-docker push carpenter0100/dockerlastic-php:latest
+docker push user/dockerlastic-php:latest
 ```
 
 # network
@@ -64,8 +64,8 @@ docker network create -d bridge backend_net
 
 # run
 ```
-docker run --name gc_prod_php -d carpenter0100/dockerlastic-php:latest
-docker run -d --name dockerlastic_prod_php --network backend_net --restart=always carpenter0100/dockerlastic-php:latest
+docker run --name gc_prod_php -d user/dockerlastic-php:latest
+docker run -d --name dockerlastic_prod_php --network backend_net --restart=always user/dockerlastic-php:latest
 ```
 
 # Kill
